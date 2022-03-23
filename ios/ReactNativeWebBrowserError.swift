@@ -1,0 +1,16 @@
+//
+//  ReactNativeWebBrowserError.swift
+//  react-native-web-browser
+//
+//  Created by Michael Lee on 23/3/2022.
+//
+
+import Foundation
+
+enum ReactNativeWebBrowserError: Error {
+    case invalidHexColor(String)
+    case hexColorOverflow(UInt64)
+    case alreadyOpen
+}
+
+let ReactNativeWebBrowserErrorCode = "ReactNativeWebBrowserError"
