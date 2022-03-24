@@ -33,11 +33,30 @@ class WebBrowser: NSObject {
         resolve(nil)
     }
     
+//    @objc(openAuthSessionAsync:withRedirectUrl:withResolver:withRejector:)
+//    func openAuthSessionAsync(_ authUrlStr: String, _ redirectUrlStr: String, _ resolve: @escaping RCTPromiseResolveBlock, _ reject: @escaping RCTPromiseRejectBlock) {
+//        guard
+//            let authUrl = URL(string: authUrlStr),
+//            let redirectUrl = URL(string: redirectUrlStr)
+//        else {
+//            reject(ReactNativeWebBrowserErrorCode, "Invalid Argument: authUrl or redirectUrl is invalid.", ReactNativeWebBrowserError.invalidArgument("authUrl or redirectUrl"))
+//            return
+//        }
+//        let promise = Promise(resolver: resolve, rejector: reject)
+//
+//        guard self.currentAuthSession?.isOpen != true else {
+//            reject(ReactNativeWebBrowserErrorCode, "AuthSession is already opened.", ReactNativeWebBrowserError.alreadyOpen)
+//            return
+//        }
+//        self.currentAuthSession = WebAuthSession(authUrl: authUrl, redirectUrl: redirectUrl)
+//        self.currentAuthSession?.open(promise)
+//    }
+    
     @objc(openAuthSessionAsync:withRedirectUrl:withResolver:withRejector:)
-    func openAuthSessionAsync(_ authUrlStr: String, redirectUrlStr: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+    func openAuthSessionAsync(_ authUrlStr: NSString, redirectUrlStr: NSString, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         guard
-            let authUrl = URL(string: authUrlStr),
-            let redirectUrl = URL(string: redirectUrlStr)
+            let authUrl = URL(string: authUrlStr as String),
+            let redirectUrl = URL(string: redirectUrlStr as String)
         else {
             reject(ReactNativeWebBrowserErrorCode, "Invalid Argument: authUrl or redirectUrl is invalid.", ReactNativeWebBrowserError.invalidArgument("authUrl or redirectUrl"))
             return
@@ -50,7 +69,7 @@ class WebBrowser: NSObject {
         }
         self.currentAuthSession = WebAuthSession(authUrl: authUrl, redirectUrl: redirectUrl)
         self.currentAuthSession?.open(promise)
-    }
+    } 
     
     @objc(dismissAuthSession:withRejector:)
     func dismissAuthSession(_ resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {

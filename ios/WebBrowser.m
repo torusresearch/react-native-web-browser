@@ -10,10 +10,16 @@ RCT_EXTERN_METHOD(openBrowserAsync:(NSString*)urlStr
 RCT_EXTERN_METHOD(dismissBrowser:(RCTPromiseResolveBlock)resolve
                  withRejecter:(RCTPromiseRejectBlock)reject)
 
+//RCT_EXTERN_METHOD(openAuthSessionAsync:(NSString*)authUrlStr
+//                 withRedirectUrl:(NSString*)redirectUrlStr
+//                 withResolver:(RCTPromiseResolveBlock)resolve
+//                 withRejecter:(RCTPromiseRejectBlock)reject)
+
 RCT_EXTERN_METHOD(openAuthSessionAsync:(NSString*)authUrlStr
-                 withRedirectUrl:(NSString*)redirectUrlStr
-                 withResolver:(RCTPromiseResolveBlock)resolve
-                 withRejecter:(RCTPromiseRejectBlock)reject)
+                  withRedirectUrl:(NSString*)redirectUrlStr
+                  withResolver:(RCTPromiseResolveBlock)resolve
+                  withRejector:(RCTPromiseRejectBlock)reject)
+
 
 RCT_EXTERN_METHOD(dismissAuthSession:(RCTPromiseResolveBlock)resolve
                  withRejecter:(RCTPromiseRejectBlock)reject)
