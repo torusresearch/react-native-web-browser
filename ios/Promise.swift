@@ -12,14 +12,14 @@ import Foundation
 struct Promise {
     public typealias ResolveClosure = RCTPromiseResolveBlock
     public typealias RejectClosure = RCTPromiseRejectBlock
-    
+
     public var resolver: ResolveClosure
     public var rejector: RejectClosure
-    
+
     public func resolve(_ value: Any? = nil) {
         resolver(value)
     }
-    
+
     public func reject(_ error: Error) {
         rejector("ReactNativeWebBrowser", error.localizedDescription, error)
     }

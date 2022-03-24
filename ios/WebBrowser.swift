@@ -4,18 +4,17 @@ import Foundation
 
 @objc(WebBrowser)
 class WebBrowser: NSObject {
-
     @objc(multiply:withB:withResolver:withRejecter:)
-    func multiply(a: Float, b: Float, resolve:RCTPromiseResolveBlock,reject:RCTPromiseRejectBlock) -> Void {
-        resolve(a*b)
+    func multiply(a: Float, b: Float, resolve: RCTPromiseResolveBlock, reject _: RCTPromiseRejectBlock) {
+        resolve(a * b)
     }
-    
-    func openBrowserAsync(urlStr: String, optionsDict: [String: Any], resolve:RCTPromiseResolveBlock,reject:RCTPromiseRejectBlock) -> Void {
+
+    func openBrowserAsync(urlStr: String, optionsDict: [String: Any], resolve _: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         guard
-            let url = URL.init(string: urlStr),
+            let url = URL(string: urlStr),
             let options = try? JSONEncoder().decode(WebBrowserOptions.self, from: JSONSerialization.data(withJSONObject: optionsDict))
         else {
-            reject(
+            reject()
         }
     }
 }
