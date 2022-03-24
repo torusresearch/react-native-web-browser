@@ -15,6 +15,7 @@ private class PresentationContextProvider: NSObject, ASWebAuthenticationPresenta
     }
 }
 
+@objc(WebAuthSession)
 @available(iOS 12.0, *)
 internal final class WebAuthSession {
     var authSession: ASWebAuthenticationSession?

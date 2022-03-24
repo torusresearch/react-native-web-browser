@@ -9,6 +9,7 @@
 
 import Foundation
 
+@objc(Conversions)
 internal enum Conversions {
     /**
      Converts hex string to `UIColor` or throws an exception if the string is corrupted.
