@@ -7,7 +7,6 @@
 
 import Foundation
 
-@objc(ReactNativeWebBrowserError)
 enum ReactNativeWebBrowserError: Error {
     case invalidHexColor(String)
     case hexColorOverflow(UInt64)

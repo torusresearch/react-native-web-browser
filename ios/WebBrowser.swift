@@ -2,7 +2,6 @@ import Foundation
 
 // https://github.com/expo/expo/blob/main/packages/expo-web-browser/ios/WebBrowserModule.swift
 
-@objc(WebBrowser)
 class WebBrowser: NSObject {
     private var currentWebBrowserSession: WebBrowserSession?
     private var currentAuthSession: WebAuthSession?

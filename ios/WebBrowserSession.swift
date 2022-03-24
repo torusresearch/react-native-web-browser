@@ -8,7 +8,6 @@
 import Foundation
 import SafariServices
 
-@objc(WebBrowserSessio)
 internal class WebBrowserSession: NSObject, SFSafariViewControllerDelegate {
     let viewController: SFSafariViewController
     var promise: Promise?
