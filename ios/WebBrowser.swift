@@ -34,7 +34,7 @@ class WebBrowser: NSObject {
     }
     
     @objc(openAuthSessionAsync:withRedirectUrl:withResolver:withRejector:)
-    func openAuthSessionAsync(authUrlStr: String, redirectUrlStr: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+    func openAuthSessionAsync(_ authUrlStr: String, redirectUrlStr: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         guard
             let authUrl = URL(string: authUrlStr),
             let redirectUrl = URL(string: redirectUrlStr)
@@ -53,7 +53,7 @@ class WebBrowser: NSObject {
     }
     
     @objc(dismissAuthSession:withRejector:)
-    func dismissAuthSession(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+    func dismissAuthSession(_ resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         self.currentAuthSession?.dismiss()
         self.currentAuthSession = nil
         resolve(nil)
