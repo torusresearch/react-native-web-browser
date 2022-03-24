@@ -11,6 +11,7 @@ enum ReactNativeWebBrowserError: Error {
     case invalidHexColor(String)
     case hexColorOverflow(UInt64)
     case alreadyOpen
+    case invalidArgument(String)
 }
 
 let ReactNativeWebBrowserErrorCode = "ReactNativeWebBrowserError"

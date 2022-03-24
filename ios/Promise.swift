@@ -21,6 +21,6 @@ struct Promise {
     }
 
     public func reject(_ error: Error) {
-        rejector("ReactNativeWebBrowser", error.localizedDescription, error)
+        rejector(ReactNativeWebBrowserErrorCode, error.localizedDescription, error)
     }
 }
