@@ -20,3 +20,32 @@ const WebBrowser = NativeModules.WebBrowser
 export function multiply(a: number, b: number): Promise<number> {
   return WebBrowser.multiply(a, b);
 }
+
+export interface WebBrowserOpenOptions {
+  controlsColor?: string;
+  dismissButtonStyle?: 'done' | 'close' | 'cancel';
+  enableBarCollapsing?: boolean;
+  readerMode?: boolean;
+  toolbarColor?: string;
+}
+
+export interface WebBrowserRedirectResult {
+  /**
+   * Type of the result.
+   */
+  type: 'success';
+  url: string;
+}
+
+export type WebBrowserAuthSessionResult = WebBrowserRedirectResult;
+
+export async function openAuthSessionAsync(
+  url: string,
+  redirectUrl: string
+): Promise<WebBrowserAuthSessionResult> {
+  return await WebBrowser.openAuthSessionAsync(url, redirectUrl);
+}
+
+export async function dismissAuthSession(): Promise<void> {
+  return await WebBrowser.dismissAuthSession();
+}
