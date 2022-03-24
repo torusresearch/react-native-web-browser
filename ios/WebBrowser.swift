@@ -8,10 +8,10 @@ class WebBrowser: NSObject {
     private var currentAuthSession: WebAuthSession?
     
     @objc(openBrowserAsync:withOptionsDict:withResolver:withRejector:)
-    func openBrowserAsync(urlStr: String, optionsDict: [String: Any], resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+    func openBrowserAsync(urlStr: String, optionsDict: [String: Any], resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         guard
             let url = URL(string: urlStr),
-            let options = try? JSONEncoder().decode(WebBrowserOptions.self, from: JSONSerialization.data(withJSONObject: optionsDict))
+            let options = try? JSONDecoder().decode(WebBrowserOptions.self, from: JSONSerialization.data(withJSONObject: optionsDict))
         else {
             reject(ReactNativeWebBrowserErrorCode, "Invalid Argument: url or options is invalid.", ReactNativeWebBrowserError.invalidArgument("url or options"))
             return
@@ -34,7 +34,7 @@ class WebBrowser: NSObject {
     }
     
     @objc(openAuthSessionAsync:withRedirectUrl:withResolver:withRejector:)
-    func openAuthSessionAsync(authUrlStr: String, redirectUrlStr: String, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+    func openAuthSessionAsync(authUrlStr: String, redirectUrlStr: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         guard
             let authUrl = URL(string: authUrlStr),
             let redirectUrl = URL(string: redirectUrlStr)
@@ -80,7 +80,7 @@ class WebBrowser: NSObject {
     }
     
     @objc
-    override var methodQueue: DispatchQueue {
+    var methodQueue: DispatchQueue {
         return DispatchQueue.main
     }
 }
