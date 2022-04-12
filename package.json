@@ -143,5 +143,8 @@
         }
       ]
     ]
+  },
+  "dependencies": {
+    "compare-urls": "^2.0.0"
   }
 }
