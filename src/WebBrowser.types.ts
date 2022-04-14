@@ -2,7 +2,10 @@ export type RedirectEvent = {
   url: string;
 };
 
-export type WebBrowserWindowFeatures = Record<string, number | boolean | string>;
+export type WebBrowserWindowFeatures = Record<
+  string,
+  number | boolean | string
+>;
 
 export type WebBrowserOpenOptions = {
   /**
@@ -98,7 +101,9 @@ export type AuthSessionOpenOptions = WebBrowserOpenOptions & {
   preferEphemeralSession?: boolean;
 };
 
-export type WebBrowserAuthSessionResult = WebBrowserRedirectResult | WebBrowserResult;
+export type WebBrowserAuthSessionResult =
+  | WebBrowserRedirectResult
+  | WebBrowserResult;
 
 export type WebBrowserCustomTabsResults = {
   /**
@@ -226,3 +231,9 @@ export type WebBrowserCompleteAuthSessionResult = {
    */
   message: string;
 };
+
+export class UnavailabilityError extends Error {
+  constructor(tag: string, methodName: string) {
+    super(`${UnavailabilityError.name}: ${tag}: ${methodName}`);
+  }
+}

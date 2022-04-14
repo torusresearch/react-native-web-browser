@@ -1,18 +1,31 @@
 import * as React from 'react';
 
-import { StyleSheet, View, Text } from 'react-native';
-import { multiply } from 'react-native-web-browser';
+import { StyleSheet, View, Text, Button } from 'react-native';
+import {
+  openBrowserAsync,
+  openAuthSessionAsync,
+} from 'react-native-web-browser';
 
 export default function App() {
-  const [result, setResult] = React.useState<number | undefined>();
-
-  React.useEffect(() => {
-    multiply(3, 7).then(setResult);
-  }, []);
-
   return (
     <View style={styles.container}>
-      <Text>Result: {result}</Text>
+      <Button
+        title="Open browser window to Google.com"
+        onPress={() => openBrowserAsync('https://google.com')}
+      >
+        Open browser window to Google.com
+      </Button>
+      <Button
+        title="Open auth browser window to Google.com"
+        onPress={() =>
+          openAuthSessionAsync(
+            'https://google.com',
+            'https://account.google.com'
+          )
+        }
+      >
+        Open auth browser window to Google.com
+      </Button>
     </View>
   );
 }
