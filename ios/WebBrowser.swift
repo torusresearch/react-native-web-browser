@@ -2,8 +2,8 @@ import Foundation
 
 // https://github.com/expo/expo/blob/main/packages/expo-web-browser/ios/WebBrowserModule.swift
 
-@objc(WebBrowser)
-class WebBrowser: NSObject {
+@objc(NativeWebBrowser)
+class NativeWebBrowser: NSObject {
     private var currentWebBrowserSession: WebBrowserSession?
     private var currentAuthSession: WebAuthSession?
     
@@ -33,22 +33,24 @@ class WebBrowser: NSObject {
         resolve(nil)
     }
     
-    @objc(openAuthSessionAsync:withRedirectUrl:withResolver:withRejector:)
-    func openAuthSessionAsync(_ authUrlStr: NSString, redirectUrlStr: NSString, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+    @objc(openAuthSessionAsync:withRedirectUrl:withOptionsDict:withResolver:withRejector:)
+    func openAuthSessionAsync(_ authUrlStr: NSString, redirectUrlStr: NSString, optionsDict: [String: Any], resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         guard
             let authUrl = URL(string: authUrlStr as String),
-            let redirectUrl = URL(string: redirectUrlStr as String)
+            let redirectUrl = URL(string: redirectUrlStr as String),
+            var options = try? JSONDecoder().decode(AuthSessionOptions.self, from: JSONSerialization.data(withJSONObject: optionsDict))
         else {
-            reject(ReactNativeWebBrowserErrorCode, "Invalid Argument: authUrl or redirectUrl is invalid.", ReactNativeWebBrowserError.invalidArgument("authUrl or redirectUrl"))
+            reject(ReactNativeWebBrowserErrorCode, "Invalid Argument: authUrl or redirectUrl or options is invalid.", ReactNativeWebBrowserError.invalidArgument("authUrl or redirectUrl or options"))
             return
         }
+        
         let promise = Promise(resolver: resolve, rejector: reject)
         
         guard self.currentAuthSession?.isOpen != true else {
             reject(ReactNativeWebBrowserErrorCode, "AuthSession is already opened.", ReactNativeWebBrowserError.alreadyOpen)
             return
         }
-        self.currentAuthSession = WebAuthSession(authUrl: authUrl, redirectUrl: redirectUrl)
+        self.currentAuthSession = WebAuthSession(authUrl: authUrl, redirectUrl: redirectUrl, options: options)
         self.currentAuthSession?.open(promise)
     } 
     

@@ -20,6 +20,19 @@ struct WebBrowserOptions: Codable {
     var controlsColor: CodableColor?
 }
 
+class AuthSessionOptions: Codable {
+    let preferEphemeralSession: Bool
+    
+    required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        if let preferEphemeralSession = try container.decodeIfPresent(Bool.self, forKey: .preferEphemeralSession) {
+            self.preferEphemeralSession = preferEphemeralSession
+        } else {
+            self.preferEphemeralSession = false
+        }
+    }
+}
+
 enum DismissButtonStyle: String, Codable {
     case done
     case close

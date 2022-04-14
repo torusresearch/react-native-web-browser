@@ -1,6 +1,6 @@
 #import <React/RCTBridgeModule.h>
 
-@interface RCT_EXTERN_MODULE(WebBrowser, NSObject)
+@interface RCT_EXTERN_MODULE(NativeWebBrowser, NSObject)
 
 RCT_EXTERN_METHOD(openBrowserAsync:(NSString*)urlStr
                  withOptionsDict:(NSDictionary*)optionsDict
@@ -17,6 +17,7 @@ RCT_EXTERN_METHOD(dismissBrowser:(RCTPromiseResolveBlock)resolve
 
 RCT_EXTERN_METHOD(openAuthSessionAsync:(NSString*)authUrlStr
                   withRedirectUrl:(NSString*)redirectUrlStr
+                  withOptionsDict:(NSDictionary*)optionsDict
                   withResolver:(RCTPromiseResolveBlock)resolve
                   withRejector:(RCTPromiseRejectBlock)reject)
 
