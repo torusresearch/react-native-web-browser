@@ -9,8 +9,9 @@ RCT_EXTERN_METHOD(openBrowserAsync:(NSString*)urlStr
                   withResolver:(RCTPromiseResolveBlock)resolve
                   withRejector:(RCTPromiseRejectBlock)reject)
 
+
 RCT_EXTERN_METHOD(dismissBrowser:(RCTPromiseResolveBlock)resolve
-                 withRejecter:(RCTPromiseRejectBlock)reject)
+                  withRejector:(RCTPromiseRejectBlock)reject)
 
 
 RCT_EXTERN_METHOD(openAuthSessionAsync:(NSString*)authUrlStr
@@ -21,23 +22,22 @@ RCT_EXTERN_METHOD(openAuthSessionAsync:(NSString*)authUrlStr
 
 
 RCT_EXTERN_METHOD(dismissAuthSession:(RCTPromiseResolveBlock)resolve
-                 withRejecter:(RCTPromiseRejectBlock)reject)
+                  withRejector:(RCTPromiseRejectBlock)reject)
 
 
 RCT_EXTERN_METHOD(warmUpAsync:(RCTPromiseResolveBlock)resolve
-                 withRejecter:(RCTPromiseRejectBlock)reject)
+                  withRejecter:(RCTPromiseRejectBlock)reject)
 
 
 RCT_EXTERN_METHOD(coolDownAsync:(RCTPromiseResolveBlock)resolve
-                 withRejecter:(RCTPromiseRejectBlock)reject)
-
+                  withRejecter:(RCTPromiseRejectBlock)reject)
 
 RCT_EXTERN_METHOD(mayInitWithUrlAsync:(RCTPromiseResolveBlock)resolve
-                 withRejecter:(RCTPromiseRejectBlock)reject)
+                  withRejecter:(RCTPromiseRejectBlock)reject)
 
 
 RCT_EXTERN_METHOD(getCustomTabsSupportingBrowsers:(RCTPromiseResolveBlock)resolve
-                 withRejecter:(RCTPromiseRejectBlock)reject)
+                  withRejecter:(RCTPromiseRejectBlock)reject)
 
 
 @end

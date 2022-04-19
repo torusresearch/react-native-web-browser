@@ -1,9 +1,11 @@
 import * as React from 'react';
 
-import { StyleSheet, View, Text, Button } from 'react-native';
+import {StyleSheet, View, Text, Button} from 'react-native';
 import {
   openBrowserAsync,
   openAuthSessionAsync,
+  dismissAuthSession,
+  dismissBrowser,
 } from 'react-native-web-browser';
 
 export default function App() {
@@ -11,8 +13,7 @@ export default function App() {
     <View style={styles.container}>
       <Button
         title="Open browser window to Google.com"
-        onPress={() => openBrowserAsync('https://google.com')}
-      >
+        onPress={() => openBrowserAsync('https://google.com')}>
         Open browser window to Google.com
       </Button>
       <Button
@@ -20,11 +21,16 @@ export default function App() {
         onPress={() =>
           openAuthSessionAsync(
             'https://google.com',
-            'https://account.google.com'
+            'https://account.google.com',
           )
-        }
-      >
+        }>
         Open auth browser window to Google.com
+      </Button>
+      <Button title="Dismiss Auth Session" onPress={() => dismissAuthSession()}>
+        Dismiss Auth Session
+      </Button>
+      <Button title="Dismiss Browser" onPress={() => dismissBrowser()}>
+        Dismiss Browser
       </Button>
     </View>
   );

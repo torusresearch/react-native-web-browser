@@ -27,7 +27,7 @@ class NativeWebBrowser: NSObject {
     }
     
     @objc(dismissBrowser:withRejector:)
-    func dismissBrowser(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+    func dismissBrowser(_ resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         self.currentWebBrowserSession?.dismiss()
         self.currentWebBrowserSession = nil
         resolve(nil)
@@ -62,22 +62,22 @@ class NativeWebBrowser: NSObject {
     }
     
     @objc(warmUpAsync:withRejector:)
-    func warmUpAsync(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+    func warmUpAsync(_ resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         resolve(nil)
     }
     
     @objc(coolDownAsync:withRejector:)
-    func coolDownAsync(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+    func coolDownAsync(_ resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         resolve(nil)
     }
     
     @objc(mayInitWithUrlAsync:withRejector:)
-    func mayInitWithUrlAsync(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+    func mayInitWithUrlAsync(_ resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         resolve(nil)
     }
     
     @objc(getCustomTabsSupportingBrowsers:withRejector:)
-    func getCustomTabsSupportingBrowsers(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+    func getCustomTabsSupportingBrowsers(_ resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         resolve([])
     }
     
