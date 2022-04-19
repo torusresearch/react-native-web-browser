@@ -8,9 +8,9 @@ class NativeWebBrowser: NSObject {
     private var currentAuthSession: WebAuthSession?
     
     @objc(openBrowserAsync:withOptionsDict:withResolver:withRejector:)
-    func openBrowserAsync(urlStr: String, optionsDict: [String: Any], resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+    func openBrowserAsync(_ urlStr: NSString, optionsDict: [String: Any], resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         guard
-            let url = URL(string: urlStr),
+            let url = URL(string: urlStr as String),
             let options = try? JSONDecoder().decode(WebBrowserOptions.self, from: JSONSerialization.data(withJSONObject: optionsDict))
         else {
             reject(ReactNativeWebBrowserErrorCode, "Invalid Argument: url or options is invalid.", ReactNativeWebBrowserError.invalidArgument("url or options"))
@@ -38,7 +38,7 @@ class NativeWebBrowser: NSObject {
         guard
             let authUrl = URL(string: authUrlStr as String),
             let redirectUrl = URL(string: redirectUrlStr as String),
-            var options = try? JSONDecoder().decode(AuthSessionOptions.self, from: JSONSerialization.data(withJSONObject: optionsDict))
+            let options = try? JSONDecoder().decode(AuthSessionOptions.self, from: JSONSerialization.data(withJSONObject: optionsDict))
         else {
             reject(ReactNativeWebBrowserErrorCode, "Invalid Argument: authUrl or redirectUrl or options is invalid.", ReactNativeWebBrowserError.invalidArgument("authUrl or redirectUrl or options"))
             return

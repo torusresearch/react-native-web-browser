@@ -8,7 +8,7 @@
 import Foundation
 import SafariServices
 
-struct WebBrowserOptions: Codable {
+class WebBrowserOptions: Codable {
     var readerMode: Bool = false
 
     var enableBarCollapsing: Bool = false
@@ -18,6 +18,39 @@ struct WebBrowserOptions: Codable {
     var toolbarColor: CodableColor?
 
     var controlsColor: CodableColor?
+    
+    required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        if let readerMode = try container.decodeIfPresent(Bool.self, forKey: .readerMode) {
+            self.readerMode = readerMode
+        } else {
+            self.readerMode = false
+        }
+        
+        if let enableBarCollapsing = try container.decodeIfPresent(Bool.self, forKey: .enableBarCollapsing) {
+            self.enableBarCollapsing = enableBarCollapsing
+        } else {
+            self.enableBarCollapsing = false
+        }
+        
+        if let dismissButtonStyle = try container.decodeIfPresent(DismissButtonStyle.self, forKey: .dismissButtonStyle) {
+            self.dismissButtonStyle = dismissButtonStyle
+        } else {
+            self.dismissButtonStyle = .done
+        }
+        
+        if let toolbarColor = try container.decodeIfPresent(CodableColor.self, forKey: .toolbarColor) {
+            self.toolbarColor = toolbarColor
+        } else {
+            self.toolbarColor = nil
+        }
+        
+        if let controlsColor = try container.decodeIfPresent(CodableColor.self, forKey: .controlsColor) {
+            self.controlsColor = controlsColor
+        } else {
+            self.controlsColor = nil
+        }
+    }
 }
 
 class AuthSessionOptions: Codable {
