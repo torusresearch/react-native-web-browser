@@ -1,5 +1,3 @@
 package com.reactnativewebbrowser
 
-interface Consumer<T> {
-  fun apply(t: T)
-}
+typealias Consumer<T> = (T) -> Unit

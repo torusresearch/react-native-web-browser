@@ -89,12 +89,6 @@ class InternalCustomTabsActivitiesHelper(val activityProvider: ActivityProvider)
   }
 
   fun onDestroy() {}
-  val exportedInterfaces: List<Class<*>?>
-    get() {
-      return listOf(
-        CustomTabsActivitiesHelper::class.java
-      )
-    }
 
   companion object {
     private val DUMMY_URL: String = "https://expo.io"

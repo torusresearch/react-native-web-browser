@@ -9,13 +9,13 @@ class DeferredClientActionsQueue<T> {
   private var client: T? = null
   fun executeOrQueueAction(action: Consumer<T>) {
     client?.also {
-      action.apply(it)
+      action(it)
     } ?: run {
       addActionToQueue(action)
     }
   }
 
-  fun setClient(client: T) {
+  fun setClient(client: T?) {
     this.client = client
     executeQueuedActions()
   }
@@ -33,7 +33,7 @@ class DeferredClientActionsQueue<T> {
     client?.also {
       var action = actions.poll()
       while (action != null) {
-        action.apply(it)
+        action(it)
         action = actions.poll()
       }
     }
