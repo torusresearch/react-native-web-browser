@@ -1,5 +1,6 @@
 package com.reactnativewebbrowser.error
 
-class NoPreferredPackageFound :
-  ReactNativeWebBrowserException("Preferred package not found.") {
+class NoPreferredPackageFound(str: String) :
+  ReactNativeWebBrowserException(str) {
+  constructor() : this("PREFERRED_PACKAGE_NOT_FOUND") {}
 }
