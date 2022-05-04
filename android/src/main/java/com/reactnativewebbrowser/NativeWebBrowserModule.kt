@@ -44,24 +44,15 @@ class NativeWebBrowserModule(reactContext: ReactApplicationContext) :
     return "NativeWebBrowser"
   }
 
-  // Example method
-  // See https://reactnative.dev/docs/native-modules-android
   @ReactMethod
-  fun multiply(a: Int, b: Int, promise: Promise) {
-
-    promise.resolve(a * b)
-
-  }
-
-  @ExpoMethod
   fun warmUpAsync(packageName: String?, promise: Promise) {
     try {
-      val packageName = givenOrPreferredPackageName(packageName)
-      customTabsConnectionHelper.warmUp(packageName)
+      val processedPackageName = givenOrPreferredPackageName(packageName)
+      customTabsConnectionHelper.warmUp(processedPackageName)
       val result = Bundle()
       result.putString(
-        expo.modules.webbrowser.WebBrowserModule.SERVICE_PACKAGE_KEY,
-        packageName
+        SERVICE_PACKAGE_KEY,
+        processedPackageName
       )
       promise.resolve(result)
     } catch (ex: NoPreferredPackageFound) {
@@ -69,16 +60,16 @@ class NativeWebBrowserModule(reactContext: ReactApplicationContext) :
     }
   }
 
-  @ExpoMethod
+  @ReactMethod
   fun coolDownAsync(packageName: String?, promise: Promise) {
-    var packageName = packageName
+    var processedPackageName = packageName
     try {
-      packageName = givenOrPreferredPackageName(packageName)
-      if (mConnectionHelper.coolDown(packageName)) {
+      processedPackageName = givenOrPreferredPackageName(processedPackageName)
+      if (customTabsConnectionHelper.coolDown(processedPackageName)) {
         val result = Bundle()
         result.putString(
-          expo.modules.webbrowser.WebBrowserModule.SERVICE_PACKAGE_KEY,
-          packageName
+          SERVICE_PACKAGE_KEY,
+          processedPackageName
         )
         promise.resolve(result)
       } else {
@@ -89,20 +80,23 @@ class NativeWebBrowserModule(reactContext: ReactApplicationContext) :
     }
   }
 
-  @ExpoMethod
+  @ReactMethod
   fun mayInitWithUrlAsync(
     url: String?,
     packageName: String?,
     promise: Promise
   ) {
-    var packageName = packageName
+    var processedPackageName = packageName
     try {
-      packageName = givenOrPreferredPackageName(packageName)
-      mConnectionHelper.mayInitWithUrl(packageName, Uri.parse(url))
+      processedPackageName = givenOrPreferredPackageName(processedPackageName)
+      customTabsConnectionHelper.mayInitWithUrl(
+        processedPackageName,
+        Uri.parse(url)
+      )
       val result = Bundle()
       result.putString(
-        expo.modules.webbrowser.WebBrowserModule.SERVICE_PACKAGE_KEY,
-        packageName
+        SERVICE_PACKAGE_KEY,
+        processedPackageName
       )
       promise.resolve(result)
     } catch (ex: NoPreferredPackageFound) {
@@ -110,36 +104,38 @@ class NativeWebBrowserModule(reactContext: ReactApplicationContext) :
     }
   }
 
-  @ExpoMethod
+  @ReactMethod
   fun getCustomTabsSupportingBrowsersAsync(promise: Promise) {
     try {
       val activities: ArrayList<String> =
-        mCustomTabsResolver.getCustomTabsResolvingActivities()
+        customTabsActivitiesHelper.customTabsResolvingActivities
       val services: ArrayList<String> =
-        mCustomTabsResolver.getCustomTabsResolvingServices()
-      val preferredPackage: String =
-        mCustomTabsResolver.getPreferredCustomTabsResolvingActivity(activities)
-      val defaultPackage: String =
-        mCustomTabsResolver.getDefaultCustomTabsResolvingActivity()
+        customTabsActivitiesHelper.customTabsResolvingServices
+      val preferredPackage: String? =
+        customTabsActivitiesHelper.getPreferredCustomTabsResolvingActivity(
+          activities
+        )
+      val defaultPackage: String? =
+        customTabsActivitiesHelper.defaultCustomTabsResolvingActivity
       var defaultCustomTabsPackage: String? = null
       if (activities.contains(defaultPackage)) { // It might happen, that default activity does not support Chrome Tabs. Then it will be ResolvingActivity and we don't want to return it as a result.
         defaultCustomTabsPackage = defaultPackage
       }
       val result = Bundle()
       result.putStringArrayList(
-        expo.modules.webbrowser.WebBrowserModule.BROWSER_PACKAGES_KEY,
+        BROWSER_PACKAGES_KEY,
         activities
       )
       result.putStringArrayList(
-        expo.modules.webbrowser.WebBrowserModule.SERVICE_PACKAGES_KEY,
+        SERVICE_PACKAGES_KEY,
         services
       )
       result.putString(
-        expo.modules.webbrowser.WebBrowserModule.PREFERRED_BROWSER_PACKAGE,
+        PREFERRED_BROWSER_PACKAGE,
         preferredPackage
       )
       result.putString(
-        expo.modules.webbrowser.WebBrowserModule.DEFAULT_BROWSER_PACKAGE,
+        DEFAULT_BROWSER_PACKAGE,
         defaultCustomTabsPackage
       )
       promise.resolve(result)
@@ -161,23 +157,23 @@ class NativeWebBrowserModule(reactContext: ReactApplicationContext) :
    * showInRecents: Boolean;
    * @param promise
    */
-  @ExpoMethod
+  @ReactMethod
   fun openBrowserAsync(
     url: String?,
-    arguments: ReadableArguments,
+    arguments: ReadableMap,
     promise: Promise
   ) {
     val intent = createCustomTabsIntent(arguments)
     intent.data = Uri.parse(url)
     try {
-      if (mCustomTabsResolver.canResolveIntent(intent)) {
-        mCustomTabsResolver.startCustomTabs(intent)
+      if (customTabsActivitiesHelper.canResolveIntent(intent)) {
+        customTabsActivitiesHelper.startCustomTabs(intent)
         val result = Bundle()
         result.putString("type", "opened")
         promise.resolve(result)
       } else {
         promise.reject(
-          expo.modules.webbrowser.WebBrowserModule.ERROR_CODE,
+          ERROR_CODE,
           "No matching activity!"
         )
       }
@@ -208,13 +204,10 @@ class NativeWebBrowserModule(reactContext: ReactApplicationContext) :
     } catch (ignored: IllegalArgumentException) {
     }
     builder.setShowTitle(
-      if (!arguments.hasKey(SHOW_TITLE_KEY) || arguments.isNull(SHOW_TITLE_KEY)) {
+      arguments.getBooleanWithDefault(
+        SHOW_TITLE_KEY,
         false
-      } else {
-        arguments.getBoolean(
-          SHOW_TITLE_KEY
-        )
-      }
+      )
     )
     if (arguments.hasKey(DEFAULT_SHARE_MENU_ITEM) && arguments.getBoolean(
         DEFAULT_SHARE_MENU_ITEM
@@ -227,7 +220,7 @@ class NativeWebBrowserModule(reactContext: ReactApplicationContext) :
     // We cannot use builder's method enableUrlBarHiding, because there is no corresponding disable method and some browsers enables it by default.
     intent.putExtra(
       CustomTabsIntent.EXTRA_ENABLE_URLBAR_HIDING,
-      arguments.getBoolean(
+      arguments.getBooleanWithDefault(
         ENABLE_BAR_COLLAPSING_KEY,
         false
       )
@@ -235,13 +228,13 @@ class NativeWebBrowserModule(reactContext: ReactApplicationContext) :
     if (!TextUtils.isEmpty(packageName)) {
       intent.setPackage(packageName)
     }
-    if (arguments.getBoolean(
+    if (arguments.getBooleanWithDefault(
         CREATE_TASK,
         true
       )
     ) {
       intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-      if (!arguments.getBoolean(
+      if (!arguments.getBooleanWithDefault(
           SHOW_IN_RECENTS,
           false
         )
@@ -253,7 +246,7 @@ class NativeWebBrowserModule(reactContext: ReactApplicationContext) :
     return intent
   }
 
-  private fun givenOrPreferredPackageName(packageName: String?): String? {
+  private fun givenOrPreferredPackageName(packageName: String?): String {
     var processedPackageName = packageName
     try {
       if (TextUtils.isEmpty(processedPackageName)) {
@@ -267,11 +260,21 @@ class NativeWebBrowserModule(reactContext: ReactApplicationContext) :
     } catch (ex: PackageManagerNotFoundException) {
       throw NoPreferredPackageFound(NO_PREFERRED_PACKAGE_MSG)
     }
-    if (TextUtils.isEmpty(processedPackageName)) {
+    if (TextUtils.isEmpty(processedPackageName) || processedPackageName == null) {
       throw NoPreferredPackageFound(NO_PREFERRED_PACKAGE_MSG)
     }
     return processedPackageName
   }
 
 
+}
+
+fun ReadableMap.getBooleanWithDefault(
+  name: String,
+  defaultValue: Boolean
+): Boolean {
+  if (!this.hasKey(name) || this.isNull(name)) {
+    return defaultValue
+  }
+  return this.getBoolean(name)
 }
