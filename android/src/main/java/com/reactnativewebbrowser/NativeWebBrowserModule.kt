@@ -3,7 +3,6 @@ package com.reactnativewebbrowser
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
-import android.os.Bundle
 import android.text.TextUtils
 import androidx.browser.customtabs.CustomTabsIntent
 import com.facebook.react.bridge.*
@@ -49,7 +48,7 @@ class NativeWebBrowserModule(reactContext: ReactApplicationContext) :
     try {
       val processedPackageName = givenOrPreferredPackageName(packageName)
       customTabsConnectionHelper.warmUp(processedPackageName)
-      val result = Bundle()
+      val result = Arguments.createMap()
       result.putString(
         SERVICE_PACKAGE_KEY,
         processedPackageName
@@ -66,14 +65,14 @@ class NativeWebBrowserModule(reactContext: ReactApplicationContext) :
     try {
       processedPackageName = givenOrPreferredPackageName(processedPackageName)
       if (customTabsConnectionHelper.coolDown(processedPackageName)) {
-        val result = Bundle()
+        val result = Arguments.createMap()
         result.putString(
           SERVICE_PACKAGE_KEY,
           processedPackageName
         )
         promise.resolve(result)
       } else {
-        promise.resolve(Bundle())
+        promise.resolve(Arguments.createMap())
       }
     } catch (ex: NoPreferredPackageFound) {
       promise.reject(ex)
@@ -93,7 +92,7 @@ class NativeWebBrowserModule(reactContext: ReactApplicationContext) :
         processedPackageName,
         Uri.parse(url)
       )
-      val result = Bundle()
+      val result = Arguments.createMap()
       result.putString(
         SERVICE_PACKAGE_KEY,
         processedPackageName
@@ -121,7 +120,7 @@ class NativeWebBrowserModule(reactContext: ReactApplicationContext) :
       if (activities.contains(defaultPackage)) { // It might happen, that default activity does not support Chrome Tabs. Then it will be ResolvingActivity and we don't want to return it as a result.
         defaultCustomTabsPackage = defaultPackage
       }
-      val result = Bundle()
+      val result = Arguments.createMap()
       result.putStringArrayList(
         BROWSER_PACKAGES_KEY,
         activities
@@ -168,7 +167,7 @@ class NativeWebBrowserModule(reactContext: ReactApplicationContext) :
     try {
       if (customTabsActivitiesHelper.canResolveIntent(intent)) {
         customTabsActivitiesHelper.startCustomTabs(intent)
-        val result = Bundle()
+        val result = Arguments.createMap()
         result.putString("type", "opened")
         promise.resolve(result)
       } else {
@@ -277,4 +276,12 @@ fun ReadableMap.getBooleanWithDefault(
     return defaultValue
   }
   return this.getBoolean(name)
+}
+
+fun WritableMap.putStringArrayList(name: String, strArr: ArrayList<String>) {
+  val arr = Arguments.createArray()
+  for (str in strArr) {
+    arr.pushString(str)
+  }
+  this.putArray(name, arr)
 }
