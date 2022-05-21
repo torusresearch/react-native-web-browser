@@ -1,5 +1,5 @@
 {
-  "name": "react-native-web-browser",
+  "name": "@toruslabs/react-native-web-browser",
   "version": "0.1.0",
   "description": "Web Browser access for React Native ported from expo-web-browser",
   "main": "lib/commonjs/index",
@@ -36,13 +36,13 @@
     "ios",
     "android"
   ],
-  "repository": "https://github.com/michaellee8/react-native-web-browser",
+  "repository": "https://github.com/torusresearch/react-native-web-browser",
   "author": "michaellee8 <ckmichael8@gmail.com> (https://github.com/michaellee8)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/michaellee8/react-native-web-browser/issues"
+    "url": "https://github.com/torusresearch/react-native-web-browser/issues"
   },
-  "homepage": "https://github.com/michaellee8/react-native-web-browser#readme",
+  "homepage": "https://github.com/torusresearch/react-native-web-browser#readme",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },

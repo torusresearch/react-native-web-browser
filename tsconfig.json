@@ -2,7 +2,7 @@
   "compilerOptions": {
     "baseUrl": "./",
     "paths": {
-      "react-native-web-browser": ["./src/index"]
+      "@toruslabs/react-native-web-browser": ["./src/index"]
     },
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
