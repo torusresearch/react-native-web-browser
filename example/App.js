@@ -6,7 +6,7 @@ import {
   openAuthSessionAsync,
   dismissAuthSession,
   dismissBrowser,
-} from 'react-native-web-browser';
+} from '@toruslabs/react-native-web-browser';
 
 export default function App() {
   return (

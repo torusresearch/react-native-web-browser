@@ -5,13 +5,13 @@ Web Browser access for React Native ported from expo-web-browser
 ## Installation
 
 ```sh
-npm install react-native-web-browser
+npm install @toruslabs/react-native-web-browser
 ```
 
 ## Usage
 
 ```js
-import { multiply } from "react-native-web-browser";
+import { multiply } from '@toruslabs/react-native-web-browser';
 
 // ...
 
