@@ -1,4 +1,4 @@
-import { AppState, AppStateStatus, Linking, Platform } from 'react-native';
+import { AppState, AppStateStatus, Linking, Platform, EmitterSubscription } from 'react-native';
 import NativeWebBrowser from './NativeWebBrowser';
 import {
   RedirectEvent,
@@ -356,6 +356,9 @@ function _onAppStateChangeAndroid(state: AppStateStatus) {
   }
 }
 
+// Event Emitter of react native `Linking`
+let _linkingSubscription: EmitterSubscription;
+
 async function _openBrowserAndWaitAndroidAsync(
   startUrl: string,
   browserParams: WebBrowserOpenOptions = {}
@@ -436,7 +439,7 @@ function _stopWaitingForRedirect() {
     );
   }
 
-  Linking.removeEventListener('url', _redirectHandler);
+  _linkingSubscription?.remove?.();
   _redirectHandler = null;
 }
 
@@ -450,6 +453,6 @@ function _waitForRedirectAsync(
       }
     };
 
-    Linking.addEventListener('url', _redirectHandler);
+    _linkingSubscription = Linking.addEventListener('url', _redirectHandler);
   });
 }
