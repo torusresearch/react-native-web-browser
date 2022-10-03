@@ -1,7 +1,6 @@
 package com.reactnativewebbrowser
 
 import android.content.Intent
-import android.graphics.Color
 import android.net.Uri
 import android.text.TextUtils
 import androidx.browser.customtabs.CustomTabsIntent
@@ -9,66 +8,49 @@ import com.facebook.react.bridge.*
 import com.reactnativewebbrowser.error.CurrentActivityNotFoundException
 import com.reactnativewebbrowser.error.NoPreferredPackageFound
 import com.reactnativewebbrowser.error.PackageManagerNotFoundException
+import com.reactnativewebbrowser.modules.OpenBrowserOptions
+import com.reactnativewebbrowser.utilities.ifNull
+import com.reactnativewebbrowser.utilities.putStringArrayList
 
-class NativeWebBrowserModule(reactContext: ReactApplicationContext) :
+private const val SERVICE_PACKAGE_KEY = "servicePackage"
+private const val BROWSER_PACKAGES_KEY = "browserPackages"
+private const val SERVICE_PACKAGES_KEY = "servicePackages"
+private const val PREFERRED_BROWSER_PACKAGE = "preferredBrowserPackage"
+private const val DEFAULT_BROWSER_PACKAGE = "defaultBrowserPackage"
+
+private const val MODULE_NAME = "Web3AuthWebBrowser"
+private const val ERROR_CODE = "RNWebBrowser"
+
+class NativeWebBrowserModule(private val reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
 
-  val activityProvider = InternalActicityProvider(reactContext)
-  val customTabsActivitiesHelper =
-    InternalCustomTabsActivitiesHelper(activityProvider)
-  val customTabsConnectionHelper =
-    InternalCustomTabsConnectionHelper(reactContext)
+  private val activityProvider = InternalActivityProvider(reactContext)
 
-  private val BROWSER_PACKAGE_KEY = "browserPackage"
-  private val SERVICE_PACKAGE_KEY = "servicePackage"
-  private val BROWSER_PACKAGES_KEY = "browserPackages"
-  private val SERVICE_PACKAGES_KEY = "servicePackages"
-  private val PREFERRED_BROWSER_PACKAGE = "preferredBrowserPackage"
-  private val DEFAULT_BROWSER_PACKAGE = "defaultBrowserPackage"
-  private val SHOW_IN_RECENTS = "showInRecents"
-  private val CREATE_TASK = "createTask"
-  private val DEFAULT_SHARE_MENU_ITEM = "enableDefaultShareMenuItem"
-  private val TOOLBAR_COLOR_KEY = "toolbarColor"
-  private val SECONDARY_TOOLBAR_COLOR_KEY = "secondaryToolbarColor"
-
-  private val ERROR_CODE = "RNWebBrowser"
-  private val TAG = "ReactNativeWebBrowser"
-  private val SHOW_TITLE_KEY = "showTitle"
-  private val ENABLE_BAR_COLLAPSING_KEY = "enableBarCollapsing"
-
-  private val NO_PREFERRED_PACKAGE_MSG =
-    "Cannot determine preferred package without satisfying it."
-
-  override fun getName(): String {
-    return "NativeWebBrowser"
+  override fun initialize() {
+    super.initialize()
+    customTabsResolver = InternalCustomTabsActivitiesHelper(activityProvider)
+    connectionHelper = InternalCustomTabsConnectionHelper(
+      requireNotNull(reactContext) {
+        "Cannot initialize WebBrowser, ReactContext is null"
+      }
+    )
   }
 
-  @ReactMethod
-  fun warmUpAsync(packageName: String?, promise: Promise) {
-    try {
-      val processedPackageName = givenOrPreferredPackageName(packageName)
-      customTabsConnectionHelper.warmUp(processedPackageName)
-      val result = Arguments.createMap()
-      result.putString(
-        SERVICE_PACKAGE_KEY,
-        processedPackageName
-      )
-      promise.resolve(result)
-    } catch (ex: NoPreferredPackageFound) {
-      promise.reject(ex)
-    }
+  override fun onCatalystInstanceDestroy() {
+    super.onCatalystInstanceDestroy()
+    connectionHelper.destroy()
   }
 
   @ReactMethod
   fun coolDownAsync(packageName: String?, promise: Promise) {
-    var processedPackageName = packageName
+    var resolvedPackageName = packageName
     try {
-      processedPackageName = givenOrPreferredPackageName(processedPackageName)
-      if (customTabsConnectionHelper.coolDown(processedPackageName)) {
+      resolvedPackageName = givenOrPreferredPackageName(resolvedPackageName)
+      if (connectionHelper.coolDown(resolvedPackageName)) {
         val result = Arguments.createMap()
         result.putString(
           SERVICE_PACKAGE_KEY,
-          processedPackageName
+          resolvedPackageName
         )
         promise.resolve(result)
       } else {
@@ -80,22 +62,14 @@ class NativeWebBrowserModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
-  fun mayInitWithUrlAsync(
-    url: String?,
-    packageName: String?,
-    promise: Promise
-  ) {
-    var processedPackageName = packageName
+  fun warmUpAsync(packageName: String?, promise: Promise) {
     try {
-      processedPackageName = givenOrPreferredPackageName(processedPackageName)
-      customTabsConnectionHelper.mayInitWithUrl(
-        processedPackageName,
-        Uri.parse(url)
-      )
+      val resolvedPackageName = givenOrPreferredPackageName(packageName)
+      connectionHelper.warmUp(resolvedPackageName)
       val result = Arguments.createMap()
       result.putString(
         SERVICE_PACKAGE_KEY,
-        processedPackageName
+        resolvedPackageName
       )
       promise.resolve(result)
     } catch (ex: NoPreferredPackageFound) {
@@ -107,15 +81,15 @@ class NativeWebBrowserModule(reactContext: ReactApplicationContext) :
   fun getCustomTabsSupportingBrowsersAsync(promise: Promise) {
     try {
       val activities: ArrayList<String> =
-        customTabsActivitiesHelper.customTabsResolvingActivities
+        customTabsResolver.customTabsResolvingActivities
       val services: ArrayList<String> =
-        customTabsActivitiesHelper.customTabsResolvingServices
+        customTabsResolver.customTabsResolvingServices
       val preferredPackage: String? =
-        customTabsActivitiesHelper.getPreferredCustomTabsResolvingActivity(
+        customTabsResolver.getPreferredCustomTabsResolvingActivity(
           activities
         )
       val defaultPackage: String? =
-        customTabsActivitiesHelper.defaultCustomTabsResolvingActivity
+        customTabsResolver.defaultCustomTabsResolvingActivity
       var defaultCustomTabsPackage: String? = null
       if (activities.contains(defaultPackage)) { // It might happen, that default activity does not support Chrome Tabs. Then it will be ResolvingActivity and we don't want to return it as a result.
         defaultCustomTabsPackage = defaultPackage
@@ -145,6 +119,30 @@ class NativeWebBrowserModule(reactContext: ReactApplicationContext) :
     }
   }
 
+  @ReactMethod
+  fun mayInitWithUrlAsync(
+    url: String?,
+    packageName: String?,
+    promise: Promise
+  ) {
+    var resolvedPackageName = packageName
+    try {
+      resolvedPackageName = givenOrPreferredPackageName(resolvedPackageName)
+      connectionHelper.mayInitWithUrl(
+        resolvedPackageName,
+        Uri.parse(url)
+      )
+      val result = Arguments.createMap()
+      result.putString(
+        SERVICE_PACKAGE_KEY,
+        resolvedPackageName
+      )
+      promise.resolve(result)
+    } catch (ex: NoPreferredPackageFound) {
+      promise.reject(ex)
+    }
+  }
+
   /**
    * @param url Url to be opened by WebBrowser
    * @param arguments Required arguments are:
@@ -159,14 +157,14 @@ class NativeWebBrowserModule(reactContext: ReactApplicationContext) :
   @ReactMethod
   fun openBrowserAsync(
     url: String?,
-    arguments: ReadableMap,
+    arguments: OpenBrowserOptions,
     promise: Promise
   ) {
     val intent = createCustomTabsIntent(arguments)
     intent.data = Uri.parse(url)
     try {
-      if (customTabsActivitiesHelper.canResolveIntent(intent)) {
-        customTabsActivitiesHelper.startCustomTabs(intent)
+      if (customTabsResolver.canResolveIntent(intent)) {
+        customTabsResolver.startCustomTabs(intent)
         val result = Arguments.createMap()
         result.putString("type", "opened")
         promise.resolve(result)
@@ -183,105 +181,67 @@ class NativeWebBrowserModule(reactContext: ReactApplicationContext) :
     }
   }
 
-  private fun createCustomTabsIntent(arguments: ReadableMap): Intent {
+  // these must be `internal` to be able to be injected in tests
+  internal lateinit var customTabsResolver: InternalCustomTabsActivitiesHelper
+  internal lateinit var connectionHelper: InternalCustomTabsConnectionHelper
+
+  private fun createCustomTabsIntent(options: OpenBrowserOptions): Intent {
     val builder = CustomTabsIntent.Builder()
-    val color: String? =
-      arguments.getString(TOOLBAR_COLOR_KEY)
-    val secondaryColor: String? =
-      arguments.getString(SECONDARY_TOOLBAR_COLOR_KEY)
-    val packageName: String? =
-      arguments.getString(BROWSER_PACKAGE_KEY)
-    try {
-      if (!TextUtils.isEmpty(color)) {
-        val intColor = Color.parseColor(color)
-        builder.setToolbarColor(intColor)
-      }
-      if (!TextUtils.isEmpty(secondaryColor)) {
-        val intSecondaryColor = Color.parseColor(secondaryColor)
-        builder.setSecondaryToolbarColor(intSecondaryColor)
-      }
-    } catch (ignored: IllegalArgumentException) {
+
+    val color = options.toolbarColor
+    if (color != null) {
+      builder.setToolbarColor(color)
     }
-    builder.setShowTitle(
-      arguments.getBooleanWithDefault(
-        SHOW_TITLE_KEY,
-        false
-      )
-    )
-    if (arguments.hasKey(DEFAULT_SHARE_MENU_ITEM) && arguments.getBoolean(
-        DEFAULT_SHARE_MENU_ITEM
-      )
-    ) {
+
+    val secondaryColor = options.secondaryToolbarColor
+    if (secondaryColor != null) {
+      builder.setSecondaryToolbarColor(secondaryColor)
+    }
+
+    builder.setShowTitle(options.showTitle)
+
+    if (options.enableDefaultShareMenuItem) {
       builder.addDefaultShareMenuItem()
     }
-    val intent = builder.build().intent
 
-    // We cannot use builder's method enableUrlBarHiding, because there is no corresponding disable method and some browsers enables it by default.
-    intent.putExtra(
-      CustomTabsIntent.EXTRA_ENABLE_URLBAR_HIDING,
-      arguments.getBooleanWithDefault(
-        ENABLE_BAR_COLLAPSING_KEY,
-        false
-      )
-    )
-    if (!TextUtils.isEmpty(packageName)) {
-      intent.setPackage(packageName)
-    }
-    if (arguments.getBooleanWithDefault(
-        CREATE_TASK,
-        true
-      )
-    ) {
-      intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-      if (!arguments.getBooleanWithDefault(
-          SHOW_IN_RECENTS,
-          false
-        )
-      ) {
-        intent.addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
-        intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+    return builder.build().intent.apply {
+      // We cannot use the builder's method enableUrlBarHiding, because there is
+      // no corresponding disable method and some browsers enable it by default.
+      putExtra(CustomTabsIntent.EXTRA_ENABLE_URLBAR_HIDING, options.enableBarCollapsing)
+
+      val packageName = options.browserPackage
+      if (!TextUtils.isEmpty(packageName)) {
+        setPackage(packageName)
+      }
+
+      if (options.shouldCreateTask) {
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+        if (!options.showInRecents) {
+          addFlags(Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+          addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+        }
       }
     }
-    return intent
   }
 
+  /**
+   * @throws NoPreferredPackageFound
+   */
   private fun givenOrPreferredPackageName(packageName: String?): String {
-    var processedPackageName = packageName
-    try {
-      if (TextUtils.isEmpty(processedPackageName)) {
-        processedPackageName =
-          customTabsActivitiesHelper.getPreferredCustomTabsResolvingActivity(
-            null
-          )
+    val resolvedPackageName: String? = try {
+      packageName?.takeIf { it.isNotEmpty() }.ifNull {
+        customTabsResolver.getPreferredCustomTabsResolvingActivity(null)
       }
     } catch (ex: CurrentActivityNotFoundException) {
-      throw NoPreferredPackageFound(NO_PREFERRED_PACKAGE_MSG)
+      throw NoPreferredPackageFound()
     } catch (ex: PackageManagerNotFoundException) {
-      throw NoPreferredPackageFound(NO_PREFERRED_PACKAGE_MSG)
+      throw NoPreferredPackageFound()
     }
-    if (TextUtils.isEmpty(processedPackageName) || processedPackageName == null) {
-      throw NoPreferredPackageFound(NO_PREFERRED_PACKAGE_MSG)
-    }
-    return processedPackageName
+
+    return resolvedPackageName?.takeIf { it.isNotEmpty() }
+      ?: throw NoPreferredPackageFound()
   }
 
-
-}
-
-fun ReadableMap.getBooleanWithDefault(
-  name: String,
-  defaultValue: Boolean
-): Boolean {
-  if (!this.hasKey(name) || this.isNull(name)) {
-    return defaultValue
-  }
-  return this.getBoolean(name)
-}
-
-fun WritableMap.putStringArrayList(name: String, strArr: ArrayList<String>) {
-  val arr = Arguments.createArray()
-  for (str in strArr) {
-    arr.pushString(str)
-  }
-  this.putArray(name, arr)
+  override fun getName(): String = MODULE_NAME
 }

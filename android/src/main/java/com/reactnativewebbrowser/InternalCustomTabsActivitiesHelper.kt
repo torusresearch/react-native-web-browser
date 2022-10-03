@@ -8,99 +8,116 @@ import android.net.Uri
 import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.browser.customtabs.CustomTabsService
-import java.util.ArrayList
-import java.util.Collections
-import java.util.LinkedHashSet
-
-
-import androidx.browser.customtabs.CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION
 import com.reactnativewebbrowser.error.CurrentActivityNotFoundException
 import com.reactnativewebbrowser.error.PackageManagerNotFoundException
+import java.util.ArrayList
+import java.util.LinkedHashSet
 
-class InternalCustomTabsActivitiesHelper(val activityProvider: ActivityProvider) :
-  CustomTabsActivitiesHelper {
+private const val DUMMY_URL = "https://web3auth.io"
 
-  override val customTabsResolvingActivities: ArrayList<String>
-    get() = mapCollectionToDistinctArrayList(
-      getResolvingActivities(
-        createDefaultCustomTabsIntent()
-      )
-    ) { resolveInfo -> resolveInfo.activityInfo.packageName }
+class InternalCustomTabsActivitiesHelper(
+  private val activityProvider: ActivityProvider?
+) {
 
-  override val customTabsResolvingServices: ArrayList<String>
-    get() {
-      return mapCollectionToDistinctArrayList(
-        packageManager.queryIntentServices(
-          createDefaultCustomTabsServiceIntent(),
-          0
-        )
-      ) { resolveInfo -> resolveInfo.serviceInfo.packageName }
-    }
+  // region Actual custom tabs activities helper methods
 
-  override fun getPreferredCustomTabsResolvingActivity(packages: List<String>?): String? {
-    var packages: List<String>? = packages
-    if (packages == null) packages = customTabsResolvingActivities
-    return CustomTabsClient.getPackageName(currentActivity, packages)
+  /**
+   * @throws CurrentActivityNotFoundException
+   * @throws PackageManagerNotFoundException
+   */
+  fun canResolveIntent(intent: Intent): Boolean = getResolvingActivities(intent).isNotEmpty()
+
+  /**
+   * @throws PackageManagerNotFoundException
+   * @throws CurrentActivityNotFoundException
+   */
+  val customTabsResolvingActivities: ArrayList<String>
+    get() = getResolvingActivities(createDefaultCustomTabsIntent())
+      .mapToDistinctArrayList { resolveInfo: ResolveInfo ->
+        resolveInfo.activityInfo.packageName
+      }
+
+  /**
+   * @throws PackageManagerNotFoundException
+   * @throws CurrentActivityNotFoundException
+   */
+  val customTabsResolvingServices: ArrayList<String>
+    get() = packageManager.queryIntentServices(createDefaultCustomTabsServiceIntent(), 0)
+      .mapToDistinctArrayList { resolveInfo: ResolveInfo ->
+        resolveInfo.serviceInfo.packageName
+      }
+
+  /**
+   * @throws PackageManagerNotFoundException
+   * @throws CurrentActivityNotFoundException
+   */
+  fun getPreferredCustomTabsResolvingActivity(packages: List<String?>?): String? {
+    val resolvedPackages = packages ?: customTabsResolvingActivities
+    return CustomTabsClient.getPackageName(currentActivity, resolvedPackages)
   }
 
-  override val defaultCustomTabsResolvingActivity: String?
+  /**
+   * @throws PackageManagerNotFoundException
+   * @throws CurrentActivityNotFoundException
+   */
+  val defaultCustomTabsResolvingActivity: String?
     get() {
-      val info: ResolveInfo? =
-        packageManager.resolveActivity(createDefaultCustomTabsIntent(), 0)
+      val info = packageManager.resolveActivity(createDefaultCustomTabsIntent(), 0)
       return info?.activityInfo?.packageName
     }
 
-  override fun canResolveIntent(intent: Intent): Boolean {
-    return getResolvingActivities(intent).isNotEmpty()
-  }
-
-  override fun startCustomTabs(intent: Intent) {
+  /**
+   * @throws CurrentActivityNotFoundException
+   */
+  fun startCustomTabs(intent: Intent) {
     currentActivity.startActivity(intent)
   }
 
+  // endregion
+
+  // region Private helpers
+
+  /**
+   * @throws CurrentActivityNotFoundException
+   * @throws PackageManagerNotFoundException
+   */
   private fun getResolvingActivities(intent: Intent): List<ResolveInfo> {
     return packageManager.queryIntentActivities(intent, 0)
   }
 
+  /**
+   * @throws CurrentActivityNotFoundException
+   * @throws PackageManagerNotFoundException
+   */
   private val packageManager: PackageManager
-    get() {
-      val pm: PackageManager? = currentActivity.packageManager
-      if (pm == null) throw PackageManagerNotFoundException() else return pm
-    }
+    get() = currentActivity.packageManager ?: throw PackageManagerNotFoundException()
 
+  /**
+   * @throws CurrentActivityNotFoundException
+   */
   private val currentActivity: Activity
     get() {
-      return activityProvider.getCurrentActivity()
-        ?: throw CurrentActivityNotFoundException()
+      return activityProvider?.getCurrentActivity() ?: throw CurrentActivityNotFoundException()
     }
 
-  private fun createDefaultCustomTabsIntent(): Intent {
-    val builder: CustomTabsIntent.Builder = CustomTabsIntent.Builder()
-    val customTabsIntent: CustomTabsIntent = builder.build()
-    val intent: Intent = customTabsIntent.intent
-    intent.data = Uri.parse(DUMMY_URL)
-    return intent
-  }
+  // endregion
+}
 
-  private fun createDefaultCustomTabsServiceIntent(): Intent {
-    val serviceIntent: Intent = Intent()
-    serviceIntent.action = CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION
-    return serviceIntent
+private inline fun <T, R> Collection<T>.mapToDistinctArrayList(mapper: (T) -> R): ArrayList<R> {
+  val resultSet = LinkedHashSet<R>()
+  for (element in this) {
+    resultSet.add(mapper.invoke(element))
   }
+  return ArrayList(resultSet)
+}
 
-  fun onDestroy() {}
-
-  companion object {
-    private val DUMMY_URL: String = "https://expo.io"
-    fun <T, R> mapCollectionToDistinctArrayList(
-      toMap: Collection<T>,
-      mapper: (T) -> R
-    ): ArrayList<R> {
-      val resultSet: LinkedHashSet<R> = LinkedHashSet()
-      for (element: T in toMap) {
-        resultSet.add(mapper(element))
-      }
-      return ArrayList(resultSet)
-    }
+private fun createDefaultCustomTabsIntent(): Intent {
+  val customTabsIntent = CustomTabsIntent.Builder().build()
+  return customTabsIntent.intent.apply {
+    data = Uri.parse(DUMMY_URL)
   }
+}
+
+private fun createDefaultCustomTabsServiceIntent() = Intent().apply {
+  action = CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION
 }
