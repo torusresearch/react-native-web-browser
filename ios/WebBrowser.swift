@@ -34,10 +34,9 @@ class NativeWebBrowser: NSObject {
     }
     
     @objc(openAuthSessionAsync:withRedirectUrl:withOptionsDict:withResolver:withRejector:)
-    func openAuthSessionAsync(_ authUrlStr: NSString, redirectUrlStr: NSString, optionsDict: [String: Any], resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+    func openAuthSessionAsync(_ authUrlStr: NSString, redirectUrlStr: NSString?, optionsDict: [String: Any], resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         guard
             let authUrl = URL(string: authUrlStr as String),
-            let redirectUrl = URL(string: redirectUrlStr as String),
             let options = try? JSONDecoder().decode(AuthSessionOptions.self, from: JSONSerialization.data(withJSONObject: optionsDict))
         else {
             reject(ReactNativeWebBrowserErrorCode, "Invalid Argument: authUrl or redirectUrl or options is invalid.", ReactNativeWebBrowserError.invalidArgument("authUrl or redirectUrl or options"))
@@ -50,6 +49,7 @@ class NativeWebBrowser: NSObject {
             reject(ReactNativeWebBrowserErrorCode, "AuthSession is already opened.", ReactNativeWebBrowserError.alreadyOpen)
             return
         }
+        let redirectUrl = URL(string: redirectUrlStr as? String ?? "")
         self.currentAuthSession = WebAuthSession(authUrl: authUrl, redirectUrl: redirectUrl, options: options)
         self.currentAuthSession?.open(promise)
     } 

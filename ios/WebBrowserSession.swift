@@ -5,6 +5,8 @@
 //  Created by Michael Lee on 23/3/2022.
 //
 
+// https://github.com/expo/expo/blob/main/packages/expo-web-browser/ios/WebBrowserSession.swift
+
 import Foundation
 import SafariServices
 
@@ -27,7 +29,6 @@ internal class WebBrowserSession: NSObject, SFSafariViewControllerDelegate {
 
         super.init()
         viewController.delegate = self
-
         // By setting the modal presentation style to OverFullScreen, we disable the "Swipe to dismiss"
         // gesture that is causing a bug where sometimes `safariViewControllerDidFinish` is not called.
         // There are bugs filed already about it on OpenRadar.
@@ -55,6 +56,11 @@ internal class WebBrowserSession: NSObject, SFSafariViewControllerDelegate {
     func safariViewControllerDidFinish(_: SFSafariViewController) {
         finish(type: "cancel")
     }
+    
+    // MARK: - UIAdaptivePresentationControllerDelegate
+     func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
+       finish(type: "cancel")
+     }
 
     // MARK: - Private
 
