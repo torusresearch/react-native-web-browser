@@ -23,9 +23,6 @@ class WebBrowserOptions: Codable {
     
     var presentationStyle:PresentationStyle = .overFullScreen
     
-    struct AuthSessionOptions:Codable{
-        var preferEphemeralSession: Bool = false
-    }
     
     required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)

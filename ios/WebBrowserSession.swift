@@ -10,7 +10,7 @@
 import Foundation
 import SafariServices
 
-internal class WebBrowserSession: NSObject, SFSafariViewControllerDelegate {
+internal class WebBrowserSession: NSObject, SFSafariViewControllerDelegate, UIAdaptivePresentationControllerDelegate  {
     let viewController: SFSafariViewController
     var promise: Promise?
     var isOpen: Bool {
@@ -23,6 +23,7 @@ internal class WebBrowserSession: NSObject, SFSafariViewControllerDelegate {
         configuration.entersReaderIfAvailable = options.readerMode
 
         viewController = SFSafariViewController(url: url, configuration: configuration)
+        viewController.modalPresentationStyle = options.presentationStyle.toPresentationStyle()
         viewController.dismissButtonStyle = options.dismissButtonStyle.toSafariDismissButtonStyle()
         viewController.preferredBarTintColor = options.toolbarColor?.color
         viewController.preferredControlTintColor = options.controlsColor?.color
