@@ -5,6 +5,8 @@
 //  Created by Michael Lee on 23/3/2022.
 //
 
+//https://github.com/expo/expo/blob/main/packages/expo-web-browser/ios/WebBrowserOptions.swift
+
 import Foundation
 import SafariServices
 
@@ -18,6 +20,9 @@ class WebBrowserOptions: Codable {
     var toolbarColor: CodableColor?
 
     var controlsColor: CodableColor?
+    
+    var presentationStyle:PresentationStyle = .overFullScreen
+    
     
     required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -81,6 +86,45 @@ enum DismissButtonStyle: String, Codable {
             return .cancel
         }
     }
+}
+
+internal enum PresentationStyle: String ,Codable{
+  case fullScreen
+  case pageSheet
+  case formSheet
+  case currentContext
+  case overFullScreen
+  case overCurrentContext
+  case popover
+  case none
+  case automatic
+
+  func toPresentationStyle() -> UIModalPresentationStyle {
+    switch self {
+    case .fullScreen:
+      return .fullScreen
+    case .pageSheet:
+      return .pageSheet
+    case .formSheet:
+      return .formSheet
+    case .currentContext:
+      return .currentContext
+    case .overFullScreen:
+      return .overFullScreen
+    case .overCurrentContext:
+      return .overCurrentContext
+    case .popover:
+      return .popover
+    case .none:
+      return .none
+    case .automatic:
+      if #available(iOS 13.0, *) {
+        return .automatic
+      }
+      // default prior iOS 13
+      return .fullScreen
+    }
+  }
 }
 
 // https://github.com/expo/expo/blob/168ee43f71f005baa11edf98e518593443e1807a/packages/expo-modules-core/ios/Swift/Arguments/Convertibles.swift
