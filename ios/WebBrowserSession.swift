@@ -5,10 +5,12 @@
 //  Created by Michael Lee on 23/3/2022.
 //
 
+// https://github.com/expo/expo/blob/main/packages/expo-web-browser/ios/WebBrowserSession.swift
+
 import Foundation
 import SafariServices
 
-internal class WebBrowserSession: NSObject, SFSafariViewControllerDelegate {
+internal class WebBrowserSession: NSObject, SFSafariViewControllerDelegate, UIAdaptivePresentationControllerDelegate  {
     let viewController: SFSafariViewController
     var promise: Promise?
     var isOpen: Bool {
@@ -21,13 +23,13 @@ internal class WebBrowserSession: NSObject, SFSafariViewControllerDelegate {
         configuration.entersReaderIfAvailable = options.readerMode
 
         viewController = SFSafariViewController(url: url, configuration: configuration)
+        viewController.modalPresentationStyle = options.presentationStyle.toPresentationStyle()
         viewController.dismissButtonStyle = options.dismissButtonStyle.toSafariDismissButtonStyle()
         viewController.preferredBarTintColor = options.toolbarColor?.color
         viewController.preferredControlTintColor = options.controlsColor?.color
 
         super.init()
         viewController.delegate = self
-
         // By setting the modal presentation style to OverFullScreen, we disable the "Swipe to dismiss"
         // gesture that is causing a bug where sometimes `safariViewControllerDidFinish` is not called.
         // There are bugs filed already about it on OpenRadar.
@@ -55,6 +57,11 @@ internal class WebBrowserSession: NSObject, SFSafariViewControllerDelegate {
     func safariViewControllerDidFinish(_: SFSafariViewController) {
         finish(type: "cancel")
     }
+    
+    // MARK: - UIAdaptivePresentationControllerDelegate
+     func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
+       finish(type: "cancel")
+     }
 
     // MARK: - Private
 

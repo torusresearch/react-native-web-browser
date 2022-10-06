@@ -9,7 +9,7 @@ export type WebBrowserWindowFeatures = Record<
 
 export type WebBrowserOpenOptions = {
   /**
-   * Color of the toolbar in either `#AARRGGBB` or `#RRGGBB` format.
+   * Color of the toolbar. Supports React Native [color formats](https://reactnative.dev/docs/colors).
    */
   toolbarColor?: string;
   /**
@@ -23,7 +23,7 @@ export type WebBrowserOpenOptions = {
    */
   enableBarCollapsing?: boolean;
   /**
-   * Color of the secondary toolbar in either `#AARRGGBB` or `#RRGGBB` format.
+   * Color of the secondary toolbar. Supports React Native [color formats](https://reactnative.dev/docs/colors).
    * @platform android
    */
   secondaryToolbarColor?: string;
@@ -52,7 +52,7 @@ export type WebBrowserOpenOptions = {
    */
   createTask?: boolean;
   /**
-   * Tint color for controls in SKSafariViewController in `#AARRGGBB` or `#RRGGBB` format.
+   * Tint color for controls in SKSafariViewController. Supports React Native [color formats](https://reactnative.dev/docs/colors).
    * @platform ios
    */
   controlsColor?: string;
@@ -105,6 +105,7 @@ export type WebBrowserAuthSessionResult =
   | WebBrowserRedirectResult
   | WebBrowserResult;
 
+// @needsAudit
 export type WebBrowserCustomTabsResults = {
   /**
    * Default package chosen by user, `null` if there is no such packages. Also `null` usually means,
@@ -132,6 +133,7 @@ export type WebBrowserCustomTabsResults = {
   servicePackages: string[];
 };
 
+// @needsAudit @docsMissing
 export enum WebBrowserResultType {
   /**
    * @platform ios
@@ -148,6 +150,7 @@ export enum WebBrowserResultType {
   LOCKED = 'locked',
 }
 
+// @needsAudit
 /**
  * A browser presentation style. Its values are directly mapped to the [`UIModalPresentationStyle`](https://developer.apple.com/documentation/uikit/uiviewcontroller/1621355-modalpresentationstyle).
  *
@@ -191,6 +194,7 @@ export enum WebBrowserPresentationStyle {
   AUTOMATIC = 'automatic',
 }
 
+// @needsAudit
 export type WebBrowserResult = {
   /**
    * Type of the result.
@@ -198,6 +202,7 @@ export type WebBrowserResult = {
   type: WebBrowserResultType;
 };
 
+// @needsAudit @docsMissing
 export type WebBrowserRedirectResult = {
   /**
    * Type of the result.
@@ -214,6 +219,7 @@ export type WebBrowserMayInitWithUrlResult = ServiceActionResult;
 export type WebBrowserWarmUpResult = ServiceActionResult;
 export type WebBrowserCoolDownResult = ServiceActionResult;
 
+// @needsAudit
 export type WebBrowserCompleteAuthSessionOptions = {
   /**
    * Attempt to close the window without checking to see if the auth redirect matches the cached redirect URL.
@@ -221,6 +227,7 @@ export type WebBrowserCompleteAuthSessionOptions = {
   skipRedirectCheck?: boolean;
 };
 
+// @needsAudit
 export type WebBrowserCompleteAuthSessionResult = {
   /**
    * Type of the result.
