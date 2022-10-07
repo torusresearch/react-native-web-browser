@@ -6,108 +6,92 @@ import android.net.Uri
 import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsServiceConnection
 import androidx.browser.customtabs.CustomTabsSession
-import com.facebook.react.bridge.LifecycleEventListener
 
-class InternalCustomTabsConnectionHelper internal constructor(private val context: Context) :
-  CustomTabsServiceConnection(), LifecycleEventListener,
-  CustomTabsConnectionHelper {
-  private var mPackageName: String? = null
-  private val clientActions: DeferredClientActionsQueue<CustomTabsClient> =
-    DeferredClientActionsQueue()
-  private val sessionActions: DeferredClientActionsQueue<CustomTabsSession> =
-    DeferredClientActionsQueue()
+class InternalCustomTabsConnectionHelper(
+  private val context: Context
+) : CustomTabsServiceConnection() {
+  private var currentPackageName: String? = null
+  private val clientActions = DeferredClientActionsQueue<CustomTabsClient>()
+  private val sessionActions = DeferredClientActionsQueue<CustomTabsSession?>()
 
-  override fun warmUp(packageName: String) {
-    clientActions.executeOrQueueAction { client -> client.warmup(0) }
+  // region lifecycle methods
+  fun destroy() = clearConnection()
+  // endregion
+
+  // region Actual connection helper methods
+  fun warmUp(packageName: String) {
+    clientActions.executeOrQueueAction { client: CustomTabsClient -> client.warmup(0) }
     ensureConnection(packageName)
   }
 
-  override fun mayInitWithUrl(packageName: String, uri: Uri) {
-    sessionActions.executeOrQueueAction { session ->
-      session.mayLaunchUrl(
-        uri,
-        null,
-        null
-      )
+  fun mayInitWithUrl(packageName: String, uri: Uri) {
+    sessionActions.executeOrQueueAction { session: CustomTabsSession? ->
+      session?.mayLaunchUrl(uri, null, null)
     }
     ensureConnection(packageName)
     ensureSession()
   }
 
-  private fun ensureSession() {
-    if (!sessionActions.hasClient()) {
-      clientActions.executeOrQueueAction { client ->
-        sessionActions.setClient(
-          client.newSession(null)
-        )
-      }
-    }
-  }
-
-  override fun coolDown(packageName: String): Boolean {
-    if ((packageName == mPackageName)) {
-      unbindService()
+  fun coolDown(packageName: String): Boolean {
+    if (isConnectionStarted(packageName)) {
+      clearConnection()
       return true
     }
     return false
   }
+  // endregion
 
-  private fun ensureConnection(packageName: String) {
-    if (mPackageName != null && !(mPackageName == packageName)) {
-      clearConnection()
-    }
-    if (!connectionStarted(packageName)) {
-      CustomTabsClient.bindCustomTabsService(context, packageName, this)
-      mPackageName = packageName
-    }
-  }
-
-  private fun connectionStarted(packageName: String): Boolean {
-    return (packageName == mPackageName)
-  }
-
+  // region CustomTabsServiceConnection implementation
   override fun onBindingDied(componentName: ComponentName) {
-    if ((componentName.packageName == mPackageName)) {
+    if (isConnectionStarted(componentName.packageName)) {
       clearConnection()
     }
   }
 
-  override fun onCustomTabsServiceConnected(
-    componentName: ComponentName,
-    client: CustomTabsClient
-  ) {
-    if ((componentName.packageName == mPackageName)) {
+  override fun onCustomTabsServiceConnected(componentName: ComponentName, client: CustomTabsClient) {
+    if (isConnectionStarted(componentName.packageName)) {
       clientActions.setClient(client)
     }
   }
 
   override fun onServiceDisconnected(componentName: ComponentName) {
-    if ((componentName.packageName == mPackageName)) {
+    if (isConnectionStarted(componentName.packageName)) {
       clearConnection()
     }
   }
+  // endregion
 
-  override fun onHostResume() {
-    // do nothing
+  private fun ensureSession() {
+    if (sessionActions.hasClient()) {
+      return
+    }
+
+    clientActions.executeOrQueueAction { client: CustomTabsClient ->
+      sessionActions.setClient(client.newSession(null))
+    }
   }
 
-  override fun onHostPause() {
-    // do nothing
+  private fun ensureConnection(packageName: String) {
+    if (currentPackageName != null && currentPackageName != packageName) {
+      clearConnection()
+    }
+    if (!isConnectionStarted(packageName)) {
+      CustomTabsClient.bindCustomTabsService(context, packageName, this)
+      currentPackageName = packageName
+    }
   }
 
-  override fun onHostDestroy() {
-    unbindService()
-  }
-
-  private fun unbindService() {
-    context.unbindService(this)
-    clearConnection()
+  private fun isConnectionStarted(packageName: String): Boolean {
+    return packageName == currentPackageName
   }
 
   private fun clearConnection() {
-    mPackageName = null
+    if (currentPackageName != null) {
+      context.unbindService(this)
+    }
+
+    currentPackageName = null
     clientActions.clear()
     sessionActions.clear()
   }
-
 }
