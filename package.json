@@ -1,6 +1,6 @@
 {
   "name": "@toruslabs/react-native-web-browser",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Web Browser access for React Native ported from expo-web-browser",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
