@@ -302,7 +302,7 @@ PODS:
   - React-jsinspector (0.70.2)
   - React-logger (0.70.2):
     - glog
-  - react-native-web-browser (0.2.0):
+  - react-native-web-browser (1.0.0):
     - React-Core
   - React-perflogger (0.70.2)
   - React-RCTActionSheet (0.70.2):
@@ -561,7 +561,7 @@ SPEC CHECKSUMS:
   React-jsiexecutor: 53bd208e5c27939c6e6365528393445a596a9a2b
   React-jsinspector: 26c42646ab0bb69e29e837e23754fe7121eeaf94
   React-logger: 1bfd109a0ffa4c0989bbfac0c2d8c4abe4637faa
-  react-native-web-browser: c460e907deee31c9fda02e4e37bee7688808f0f7
+  react-native-web-browser: 448bc84ed941ef3411ce841789de35f2bbe3cadc
   React-perflogger: 6009895616a455781293950bbd63d53cfc7ffbc5
   React-RCTActionSheet: 5e90aa5712af18bfc86c2c6d97d4dbe0e5451c1d
   React-RCTAnimation: 50c44d6501f8bfb2fe885e544501f8798b4ff3d6
