@@ -56,10 +56,11 @@ class InternalCustomTabsActivitiesHelper(val activityProvider: ActivityProvider)
     return getResolvingActivities(intent).isNotEmpty()
   }
 
-  override fun startCustomTabs(intent: Intent, url: Uri?) {
+  override fun startCustomTabs(intent: Intent) {
     val defaultBrowser = currentActivity.getDefaultBrowser()
     val customTabsBrowsers = currentActivity.getCustomTabsBrowsers()
 
+    val url = intent.data
     if (customTabsBrowsers.contains(defaultBrowser)) {
       val customTabs = CustomTabsIntent.Builder().build()
       customTabs.intent.setPackage(defaultBrowser)

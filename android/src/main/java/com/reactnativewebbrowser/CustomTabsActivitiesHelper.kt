@@ -14,7 +14,7 @@ interface CustomTabsActivitiesHelper {
 
   val defaultCustomTabsResolvingActivity: String?
 
-  fun startCustomTabs(intent: Intent, url: Uri?)
+  fun startCustomTabs(intent: Intent)
 
   fun canResolveIntent(intent: Intent): Boolean
 }
