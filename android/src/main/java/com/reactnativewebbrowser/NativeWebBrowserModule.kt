@@ -166,7 +166,7 @@ class NativeWebBrowserModule(reactContext: ReactApplicationContext) :
     intent.data = Uri.parse(url)
     try {
       if (customTabsActivitiesHelper.canResolveIntent(intent)) {
-        customTabsActivitiesHelper.startCustomTabs(intent)
+        customTabsActivitiesHelper.startCustomTabs(intent, Uri.parse(url))
         val result = Arguments.createMap()
         result.putString("type", "opened")
         promise.resolve(result)

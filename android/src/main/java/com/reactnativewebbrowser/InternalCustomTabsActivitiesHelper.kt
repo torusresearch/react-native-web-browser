@@ -16,6 +16,8 @@ import java.util.LinkedHashSet
 import androidx.browser.customtabs.CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION
 import com.reactnativewebbrowser.error.CurrentActivityNotFoundException
 import com.reactnativewebbrowser.error.PackageManagerNotFoundException
+import com.reactnativewebbrowser.utilities.getCustomTabsBrowsers
+import com.reactnativewebbrowser.utilities.getDefaultBrowser
 
 class InternalCustomTabsActivitiesHelper(val activityProvider: ActivityProvider) :
   CustomTabsActivitiesHelper {
@@ -54,8 +56,26 @@ class InternalCustomTabsActivitiesHelper(val activityProvider: ActivityProvider)
     return getResolvingActivities(intent).isNotEmpty()
   }
 
-  override fun startCustomTabs(intent: Intent) {
-    currentActivity.startActivity(intent)
+  override fun startCustomTabs(intent: Intent, url: Uri?) {
+    val defaultBrowser = currentActivity.getDefaultBrowser()
+    val customTabsBrowsers = currentActivity.getCustomTabsBrowsers()
+
+    if (customTabsBrowsers.contains(defaultBrowser)) {
+      val customTabs = CustomTabsIntent.Builder().build()
+      customTabs.intent.setPackage(defaultBrowser)
+      if (url != null) {
+        customTabs.launchUrl(currentActivity, url)
+      }
+    } else if (customTabsBrowsers.isNotEmpty()) {
+      val customTabs = CustomTabsIntent.Builder().build()
+      customTabs.intent.setPackage(customTabsBrowsers[0])
+      if (url != null) {
+        customTabs.launchUrl(currentActivity, url)
+      }
+    } else {
+      // Open in browser externally
+      currentActivity.startActivity(Intent(Intent.ACTION_VIEW, url))
+    }
   }
 
   private fun getResolvingActivities(intent: Intent): List<ResolveInfo> {

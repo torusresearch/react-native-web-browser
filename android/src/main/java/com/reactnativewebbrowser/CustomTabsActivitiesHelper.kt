@@ -1,6 +1,7 @@
 package com.reactnativewebbrowser
 
 import android.content.Intent
+import android.net.Uri
 import java.util.ArrayList
 
 
@@ -13,7 +14,7 @@ interface CustomTabsActivitiesHelper {
 
   val defaultCustomTabsResolvingActivity: String?
 
-  fun startCustomTabs(intent: Intent)
+  fun startCustomTabs(intent: Intent, url: Uri?)
 
   fun canResolveIntent(intent: Intent): Boolean
 }
