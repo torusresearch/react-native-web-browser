@@ -1356,7 +1356,12 @@
     "@sinonjs/commons" "^1.7.0"
 
 "@toruslabs/react-native-web-browser@../":
-  version "1.0.0"
+  version "1.0.1"
+  dependencies:
+    compare-urls "^3.0.0"
+
+"@toruslabs/react-native-web-browser@file:../":
+  version "1.0.1"
   dependencies:
     compare-urls "^3.0.0"
 
