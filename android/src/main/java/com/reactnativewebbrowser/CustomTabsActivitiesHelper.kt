@@ -1,6 +1,7 @@
 package com.reactnativewebbrowser
 
 import android.content.Intent
+import android.net.Uri
 import java.util.ArrayList
 
 
